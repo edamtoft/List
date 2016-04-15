@@ -21,5 +21,9 @@
     "ienumerable"
   ],
   "author": "Eric Damtoft",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-jasmine": "^2.3.0"
+  }
 }
