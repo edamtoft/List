@@ -1,0 +1,25 @@
+{
+  "name": "list",
+  "version": "1.0.0",
+  "description": "library for working with iterable lists with functionality similar to CLR IEnumerable",
+  "main": "source/List.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jasmine-node tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://www.github.com/edamtoft/List.git"
+  },
+  "keywords": [
+    "list",
+    "enumerable",
+    "generator",
+    "iterator",
+    "ienumerable"
+  ],
+  "author": "Eric Damtoft",
+  "license": "MIT"
+}
