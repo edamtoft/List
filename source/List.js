@@ -38,7 +38,7 @@ class List extends Enumerable {
 
   indexOf(item) { return this._items.indexOf(item); }
   
-  get count(delegate) {
+  count(delegate) {
     if (delegate) return super.count(delegate);
     return this._items.length;
   }
