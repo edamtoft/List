@@ -69,14 +69,14 @@ class Enumerable extends IEnumerable {
    * @param keySelector {Function}
    * @returns OrderedEnumerable
    */
-  orderBy(keySelector) { return new OrderedEnumerable(this, keySelector, false); }
+  orderBy(keySelector) { return new OrderedEnumerable(this, new SortComparer(null, keySelector), false); }
   
   
   /**
    * @param keySelector {Function}
    * @returns OrderedEnumerable
    */
-  orderByDescending(keySelector) { return new OrderedEnumerable(this, keySelector, true); }
+  orderByDescending(keySelector) { return new OrderedEnumerable(this, new SortComparer(null, keySelector), true); }
   
   /**
    * @returns DistinctEnumerable
@@ -215,31 +215,31 @@ class DefaultComparer extends IComparer {
 }
 
 class SortComparer extends IComparer {
-  constructor(parent, keySelector, descending) {
+  constructor(parent, keySelector, keyComparer) {
     super();
-    this._keySelector = keySelector;
-    this._descending = descending;
     this._parent = parent;
+    this._keySelector = keySelector;
+    this._keyComparer = keyComparer || new DefaultComparer();
   }
   
   compare(x,y) {
     let order = 0;
     if (this._parent) order = this._parent.compare(x,y);
     if (order !== 0) return order;
-    let comparison = new DefaultComparer().compare(this._keySelector(x), this._keySelector(y));
-    return this._descending ? (comparison*-1) : comparison;
+    return this._keyComparer.compare(this._keySelector(x), this._keySelector(y));
   }
 }
 
 class OrderedEnumerable extends Enumerable {
-  constructor(parent, keySelector, descending, comparer) {
+  constructor(parent, sortComparer, descending) {
     super(parent);
-    this._comparer = comparer || new SortComparer(null, keySelector, descending);
+    this._comparer = sortComparer;
+    this._descending = descending;
   }
   
   getEnumerator() {
     let parent = this.getParentEnumerator();
-    let comparer = (x,y) => this._comparer.compare(x,y);
+    let comparer = (x,y) => this._comparer.compare(x,y)*(this._descending ? -1 : 1);
     return function* () {
       let buffer = [];
       for (let item of parent()) {
@@ -253,10 +253,10 @@ class OrderedEnumerable extends Enumerable {
   }
   
   createOrderedEnumerable(keySelector, descending) {
-    return new OrderedEnumerable(this, keySelector, descending, new SortComparer(this._comparer, keySelector, descending));
+    return new OrderedEnumerable(this, new SortComparer(this._comparer, keySelector), descending);
   }
   
-  thenBy(keySelector) { return this.createOrderedEnumerable(keySelector); }
+  thenBy(keySelector) { return this.createOrderedEnumerable(keySelector, false); }
   
   thenByDescending(keySelector) { return this.createOrderedEnumerable(keySelector, true); }
 }
