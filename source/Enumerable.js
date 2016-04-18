@@ -66,6 +66,19 @@ class Enumerable extends IEnumerable {
   concat(enumerable) { return new ConcatEnumerable(this, enumerable); }
   
   /**
+   * @param keySelector {Function}
+   * @returns OrderedEnumerable
+   */
+  orderBy(keySelector) { return new OrderedEnumerable(this, keySelector, false); }
+  
+  
+  /**
+   * @param keySelector {Function}
+   * @returns OrderedEnumerable
+   */
+  orderByDescending(keySelector) { return new OrderedEnumerable(this, keySelector, true); }
+  
+  /**
    * @returns DistinctEnumerable
    */
   distinct() { return new DistinctEnumerable(this); }
@@ -98,6 +111,17 @@ class Enumerable extends IEnumerable {
   firstOrDefault(delegate) {
     for (let item of this.where(delegate)) return item;
     return null;
+  }
+  
+  /**
+   * @param delegate {Function<T>}
+   * @returns T
+   */
+  last(delegate) {
+    let last = null;
+    for (let item of this.where(delegate)) last = item;
+    if (last === null) throw new Error("No matching items found");
+    return last;
   }
   
   /**
@@ -165,6 +189,76 @@ class Enumerable extends IEnumerable {
     for (let item of this.getEnumerator()) map.set(keySelector(item),valueSelector(item));
     return map;
   }
+}
+
+/**
+ * @abstract
+ * Compares two objects
+ */
+class IComparer {
+  
+  /**
+   * @abstract
+   * compare x and y
+   * @returns Number
+   */
+  compare(x,y) { throw new Error("Not Implemented"); }
+}
+
+class DefaultComparer extends IComparer {
+  compare(x,y) { 
+    if (x === y) return 0;
+    if (x > y) return 1;
+    if (x < y) return -1;
+    throw new Error("Unable to compare values");
+  }
+}
+
+class SortComparer extends IComparer {
+  constructor(parent, keySelector, descending) {
+    super();
+    this._keySelector = keySelector;
+    this._descending = descending;
+    this._parent = parent;
+  }
+  
+  compare(x,y) {
+    let order = 0;
+    if (this._parent) order = this._parent.compare(x,y);
+    if (order !== 0) return order;
+    let comparison = new DefaultComparer().compare(this._keySelector(x), this._keySelector(y));
+    return this._descending ? (comparison*-1) : comparison;
+  }
+}
+
+class OrderedEnumerable extends Enumerable {
+  constructor(parent, keySelector, descending, comparer) {
+    super(parent);
+    this._comparer = comparer || new SortComparer(null, keySelector, descending);
+  }
+  
+  getEnumerator() {
+    let parent = this.getParentEnumerator();
+    let comparer = (x,y) => this._comparer.compare(x,y);
+    return function* () {
+      let buffer = [];
+      for (let item of parent()) {
+        buffer.push(item);
+      }
+      buffer.sort(comparer);
+      for (let item of buffer) {
+        yield item;
+      }
+    }
+  }
+  
+  createOrderedEnumerable(keySelector, descending) {
+    return new OrderedEnumerable(this, keySelector, descending, new SortComparer(this._comparer, keySelector, descending));
+  }
+  
+  thenBy(keySelector) { return this.createOrderedEnumerable(keySelector); }
+  
+  thenByDescending(keySelector) { return this.createOrderedEnumerable(keySelector, true); }
 }
 
 class SelectEnumerable extends Enumerable {
