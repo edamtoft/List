@@ -19,7 +19,7 @@ describe("Enumerable", () => {
     done();
   });
   
-  it("is can be natively iterated", done => {
+  it("can be natively iterated", done => {
     let query = List.from(["a", "b", "c"]).select(c => c.toUpperCase())
     let str = "";
     for (let item of query) {
@@ -29,13 +29,34 @@ describe("Enumerable", () => {
     done();
   });
   
-  it("is can be concatenated", done => {
+  it("can be concatenated", done => {
     let query = List.from(["a", "b", "c"]).concat(["d","e","f"]).select(c => c.toUpperCase())
     let str = "";
     for (let item of query) {
       str += item;
     }
     expect(str).toBe("ABCDEF");
+    done();
+  });
+  
+  it("can be ordered", done => {
+    let query = List.from([2,3,1]).orderBy(v => v);
+    expect(query.first()).toBe(1);
+    expect(query.last()).toBe(3);
+    done();
+  });
+  
+  it("can be ordered in multiple tiers", done => {
+    let students = List.of(
+      {name: "Charlie", class: 1},
+      {name: "Baker", class: 0},
+      {name: "Adam", class: 1},
+      {name: "David", class: 0}
+    ).orderBy(v => v.class).thenBy(v => v.name).toArray();
+    expect(students[0].name).toBe("Baker");
+    expect(students[1].name).toBe("David");
+    expect(students[2].name).toBe("Adam");
+    expect(students[3].name).toBe("Charlie");
     done();
   });
 });

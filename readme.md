@@ -119,6 +119,10 @@ I.E. List. Hopefully soon, more, such as groupBy, join, etc. will be added.
 * enumerable.distinct(delegate) : Enumerable
 * enumerable.skip(length) : Enumerable
 * enumerable.take(length) : Enumerable
+* enumerable.orderBy(keySelector) : OrderedEnumerable
+* enumerable.orderByDescending(keySelector) : OrderedEnumerable
+* orderedEnumerable.thenBy(keySelector) : OrderedEnumerable
+* orderedEnumerable.thenByDescending(keySelector) : OrderedEnumerable
 * enumerable.any([delegate]) : boolean
 * enumerable.count([delegate]) : number
 * enumerable.toArray() : Array
