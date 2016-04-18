@@ -59,4 +59,18 @@ describe("Enumerable", () => {
     expect(students[3].name).toBe("Charlie");
     done();
   });
+  
+  it("can be ordered descending", done => {
+    let students = List.of(
+      {name: "Charlie", class: 1},
+      {name: "Baker", class: 0},
+      {name: "Adam", class: 1},
+      {name: "David", class: 0}
+    ).orderByDescending(v => v.class).thenByDescending(v => v.name).toArray();
+    expect(students[0].name).toBe("Charlie");
+    expect(students[1].name).toBe("Adam");
+    expect(students[2].name).toBe("David");
+    expect(students[3].name).toBe("Baker");
+    done();
+  });
 });
