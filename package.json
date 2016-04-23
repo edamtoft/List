@@ -1,5 +1,5 @@
 {
-  "name": "list",
+  "name": "enumerable-list",
   "version": "1.0.0",
   "description": "library for working with iterable lists with functionality similar to CLR IEnumerable",
   "main": "source/List.js",
